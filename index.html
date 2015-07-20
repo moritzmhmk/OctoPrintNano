@@ -1,0 +1,273 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900' rel='stylesheet' type='text/css'>
+  <link href="css/style.css" rel="stylesheet" type="text/css">
+  <script type="text/javascript" src="js/fetch.js"></script>
+  <script type="text/javascript" src="js/jquery-2.1.3.min.js"></script>
+
+  <script type="text/javascript" src="js/api_client.js"></script>
+  <script type="text/javascript">
+    var set_view = function(name) {
+      if($("#"+name).hasClass("active"))
+        return;
+      $(".view.active").attr("data-from","");
+      var from = $(".view.active").attr("id");
+      $(".view.active").removeClass("active");
+
+      $("#"+name).attr("data-from", from);
+      $("#"+name).addClass("active");
+    }
+
+    var update_list = function(view, items) {
+      list = "#" + view + " ul";
+      var has_back = $(list+" > li.back").length;
+      $(list+" > li").remove();
+      for(i=0; i<items.length; i++)
+        $(list).append("<li>"+items[i]+"</li>");
+      $(list+" > li:nth-child(1)").addClass("active");
+      $(list+" > li:nth-child(2)").addClass("below");
+      if(has_back) {
+        $(list).prepend('<li class="back above">back</li>');
+      }
+    }
+
+    var move_active_list = function(dir) {
+      $above = $(".view.active ul li.above");
+      $active = $(".view.active ul li.active");
+      $below = $(".view.active ul li.below");
+
+      if(dir<0&&$above.length) {// upwards
+        $below.removeClass("below");
+        $active.removeClass("active").addClass("below");
+        $above.removeClass("above").addClass("active");
+        $above.prev().addClass("above");
+      }
+
+      if(dir>0&&$below.length) {// downwards
+        $above.removeClass("above");
+        $active.removeClass("active").addClass("above");
+        $below.removeClass("below").addClass("active");
+        $below.next().addClass("below");
+      }
+    }
+
+    var active_list_action = function() {
+      if($(".view.active ul > li.back").hasClass("active"))
+        return set_view($(".view.active").attr("data-from"));
+
+      var active_view = $(".view.active").attr("id");
+      if(active_view == "connecting_view")
+        return connect_to_printer($(".view.active ul  > li.active").text());
+      if(active_view == "main")
+        return main_view_action($(".view.active ul  > li.active").text());
+      if(active_view == "files")
+        return print_file($(".view.active ul  > li.active").text());
+    }
+
+    var connect_to_printer = function(port) {
+      console.log(port);
+      connect_to_port(port).then( function() {
+        $("#connecting_view").attr("data-status","connecting");
+      });
+    }
+
+    var main_view_action = function(name) {
+      if(name == "Print") {
+        get_files_list().then(function(files) {
+          for(var i=0; i<files.length; i++)
+            files[i] = files[i].origin+"/"+files[i].name;
+          update_list("files", files);
+        });
+        set_view("files");
+      }
+      if(name == "Control") {
+        set_view("control");
+      }
+      if(name == "Disconnect") {
+        disconnect();
+      }
+    }
+
+
+    $(function() {
+      $('html').keydown(function(e){
+        switch(e.keyCode) {// TODO max presses per second
+          case 13://enter
+            active_list_action();
+          break;
+          case 37://left arrow
+          break;
+          case 38://top arrow
+            move_active_list(-1);
+          break;
+          case 39://right arrow
+          break;
+          case 40://bottom arrow
+            move_active_list(1);
+          break;
+        }
+      });
+
+      $(".btn.list.up").click(function() {move_active_list(-1)})
+      $(".btn.list.down").click(function() {move_active_list(1)})
+
+      $("ul").on("click", "li.active", function(e) {
+        active_list_action();
+      });
+
+      $("#connecting_view .cancel").click(function() {
+        // TODO cancel
+        console.debug("cancel");
+        $("#connecting_view").attr("data-status","");
+      });
+
+      $("#printing .pause").click(function() {
+        job_command("pause");
+      });
+      $("#printing .play").click(function() {
+        job_command("pause");
+      });
+      $("#printing .stop").click(function() {
+        job_command("cancel");
+      });
+      $("#printing .exit").click(function() {
+        set_view("main");
+      });
+
+    })
+
+    var _previous_status_flags = {};
+    var _find_changed_status_flags = function(flags) {
+      var changed = {};
+      for (var flag in flags)
+        if(_previous_status_flags[flag] != flags[flag])
+          changed[flag] = flags[flag];
+      return changed;
+    }
+    var _update_interval_function = function() {
+      get_printer_status().then(function(status) {
+        $("#connecting_view .status").text(status.text);
+        changed_flags = _find_changed_status_flags(status.flags);
+        console.log(changed_flags);
+        _previous_status_flags = status.flags;
+
+        if(changed_flags.hasOwnProperty("operational")) {
+          if(changed_flags.operational)
+            set_view("main");
+          else
+            set_view("connecting_view");
+        }
+
+        if(changed_flags.hasOwnProperty("printing")) {
+          if(changed_flags.printing) {
+            set_view("printing");
+            $("#printing").attr("data-printing", true);
+          } else {
+            $("#printing").attr("data-printing", false);
+          }
+        }
+
+        if(changed_flags.hasOwnProperty("paused")) {
+          if(changed_flags.paused) {
+            set_view("printing");
+            $("#printing").attr("data-paused", true);
+          } else {
+            $("#printing").attr("data-paused", false);
+          }
+        }
+
+      });
+
+      get_job_status().then(function(status) {
+        console.log(status);
+        var $progress_donut = $('#printing .progress .donut');
+        var dashoffset = $progress_donut.attr("stroke-dasharray")*(100-status.progress.completion)*0.01;
+        $progress_donut.attr("stroke-dashoffset", dashoffset);
+
+        var date = new Date(null);
+        date.setSeconds(status.progress.printTimeLeft);
+
+        $("#printing .time").text(date.toISOString().substr(11, 8-3));
+        $("#printing .name").text(status.job.file.name);
+      });
+    }
+    $(function() {
+      window.setInterval(_update_interval_function, 1000);
+      get_ports_list().then(function(ports) {
+        update_list("connecting_view", ports);
+      });
+    });
+  </script>
+</head>
+<body>
+  <div id="status_bar">
+    <div class="temp head">H 212&deg;C <span class="aim">220&deg;C</span></div>
+    <div class="temp bed">B 54&deg;C <span class="aim">60&deg;C</span></div>
+  </div>
+
+  <div class="view active" id="connecting_view">
+    <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
+    <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
+    <ul></ul>
+
+    <div class="status">Connecting</div>
+    <div class="cancel">cancel</div>
+  </div>
+
+  <div class="view" id="main">
+    <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
+    <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
+    <ul>
+      <li class="above">Print</li>
+      <li class="active">Control</li>
+      <li class="below">Disconnect</li>
+    </ul>
+  </div>
+
+  <div class="view" id="files">
+    <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
+    <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
+    <ul id="files"><li class="back">back</li></ul>
+  </div>
+
+  <div class="view" id="control">
+    <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
+    <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
+    <ul>
+      <li class="back above">back</li>
+      <li class="active">Move</li>
+      <li class="below">Extrude</li>
+      <li>General</li>
+    </ul>
+  </div>
+
+  <div class="view" id="printing">
+    <svg class="progress" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <circle class="bg" r="48" cx="50" cy="50" fill="none"/>
+      <circle class="donut" r="48" cx="50" cy="50" stroke-dasharray="308" fill="none"/>
+    </svg>
+    <div class="time">1:59</div>
+    <div class="name">Name_der_datei_Name_de r_datei_Name_der_datei_2.gcode</div>
+    <svg viewbox="0 0 50 50" class="pause btn active_invert">
+      <circle r="24" cx="25" cy="25" stroke-width="2"/>
+      <rect x="16" y="14" rx="4" ry="4" width="6" height="22" stroke-width="2"/>
+      <rect x="28" y="14" rx="4" ry="4" width="6" height="22" stroke-width="2"/>
+    </svg>
+    <svg viewbox="0 0 50 50" class="play btn active_invert">
+      <circle r="24" cx="25" cy="25" stroke-width="2"/>
+      <polygon points="18,14 18,36 37,25" stroke-width="2" stroke-linejoin="round">
+    </svg>
+    <svg viewbox="0 0 50 50" class="stop btn active_invert">
+      <circle r="24" cx="25" cy="25" stroke-width="2"/>
+      <rect x="14" y="14" rx="2" ry="2" width="22" height="22" stroke-width="2"/>
+    </svg>
+    <svg viewbox="0 0 50 50" class="exit btn active_invert">
+      <circle r="24" cx="25" cy="25" stroke-width="2"/>
+      <rect x="24" y="12" rx="4" ry="4" width="2" height="26" stroke-width="2" transform="rotate(45,25,25)"/>
+      <rect x="24" y="12" rx="4" ry="4" width="2" height="26" stroke-width="2" transform="rotate(-45,25,25)"/>
+    </svg>
+  </div>
+</body>
+</html>
