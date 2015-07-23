@@ -9,14 +9,17 @@
 
   <script type="text/javascript" src="js/api_client.js"></script>
   <script type="text/javascript">
-    var set_view = function(name) {
+    var set_view = function(name, back) {
       if($("#"+name).hasClass("active"))
         return;
-      $(".view.active").attr("data-from","");
-      var from = $(".view.active").attr("id");
-      $(".view.active").removeClass("active");
+      if(back) {
+        $(".view.active").attr("data-from","");
+      }
+      if(!back){
+        $("#"+name).attr("data-from", $(".view.active").attr("id"));
+      }
 
-      $("#"+name).attr("data-from", from);
+      $(".view.active").removeClass("active");
       $("#"+name).addClass("active");
     }
 
@@ -55,7 +58,7 @@
 
     var active_list_action = function() {
       if($(".view.active ul > li.back").hasClass("active"))
-        return set_view($(".view.active").attr("data-from"));
+        return set_view($(".view.active").attr("data-from"), true);
 
       var active_view = $(".view.active").attr("id");
       if(active_view == "connecting_view")
@@ -64,6 +67,8 @@
         return main_view_action($(".view.active ul  > li.active").text());
       if(active_view == "files_view")
         return print_file($(".view.active ul  > li.active").text());
+      if(active_view == "control_view")
+        return control_view_action($(".view.active ul  > li.active").text());
     }
 
     var connect_to_printer = function(port) {
@@ -87,6 +92,15 @@
       }
       if(name == "Disconnect") {
         disconnect();
+      }
+    }
+
+    var control_view_action = function(name) {
+      if(name=="Move") {
+        set_view("move_view");
+      }
+      if(name=="Extrude") {
+        set_view("extrude_view");
       }
     }
 
@@ -124,13 +138,13 @@
       });
 
       $("#printing .pause").click(function() {
-        job_command("pause");
+        pause_job();
       });
       $("#printing .play").click(function() {
-        job_command("pause");
+        pause_job();// play/pause is one command...
       });
       $("#printing .stop").click(function() {
-        job_command("cancel");
+        cancel_job();
       });
       $("#printing .exit").click(function() {
         set_view("main_view");
@@ -268,6 +282,14 @@
       <li>General</li>
     </ul>
   </div>
+
+  <div class="view" id="move_view">
+    <ul><li class="back active">back</li></ul>
+  </div>
+  <div class="view" id="extrude_view">
+    <ul><li class="back active">back</li></ul>
+  </div>
+
 
   <div class="view" id="printing">
     <svg class="progress" viewbox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">

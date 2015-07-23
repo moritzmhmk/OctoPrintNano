@@ -140,7 +140,7 @@ var update_job_status = function() {
   });
 }
 
-var job_command = function(command) {
+var _job_command = function(command) {
   return fetch(
     api_url+'job',
     {
@@ -155,4 +155,12 @@ var job_command = function(command) {
     }
   )
   .then(checkStatus);
+}
+
+var pause_job = function() {
+  _job_command("pause");
+}
+
+var cancel_job = function() {
+  _job_command("cancel");
 }
