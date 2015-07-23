@@ -1,3 +1,4 @@
+@charset "UTF-8";
 * {
   box-sizing: border-box;
   padding: 0;
@@ -24,22 +25,23 @@ body {
   padding: 2px;
   padding-left: 4px;
   padding-right: 4px; }
+  #status_bar .temp.tools {
+    left: 0px; }
+  #status_bar .temp.tools .tool {
+    margin-right: 5px; }
+  #status_bar .temp.bed {
+    right: 0px; }
   #status_bar .temp {
     position: absolute;
     top: 0px;
     transition-property: left, right;
     transition-duration: 0.5s;
     transition-timing-function: ease-in; }
-  #status_bar .temp.head {
-    left: 0px; }
-  #status_bar .temp.bed {
-    right: 0px; }
-  #status_bar .temp .aim {
-    color: #657E84;
-    font-weight: 200; }
-  #status_bar .status {
-    width: 100%;
-    text-align: center; }
+    #status_bar .temp .actual:after, #status_bar .temp .target:after {
+      content: "°C"; }
+    #status_bar .temp .target {
+      color: #657E84;
+      font-weight: 200; }
 
 .view {
   position: absolute;

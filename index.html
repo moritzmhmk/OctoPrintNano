@@ -60,9 +60,9 @@
       var active_view = $(".view.active").attr("id");
       if(active_view == "connecting_view")
         return connect_to_printer($(".view.active ul  > li.active").text());
-      if(active_view == "main")
+      if(active_view == "main_view")
         return main_view_action($(".view.active ul  > li.active").text());
-      if(active_view == "files")
+      if(active_view == "files_view")
         return print_file($(".view.active ul  > li.active").text());
     }
 
@@ -78,12 +78,12 @@
         get_files_list().then(function(files) {
           for(var i=0; i<files.length; i++)
             files[i] = files[i].origin+"/"+files[i].name;
-          update_list("files", files);
+          update_list("files_view", files);
         });
-        set_view("files");
+        set_view("files_view");
       }
       if(name == "Control") {
-        set_view("control");
+        set_view("control_view");
       }
       if(name == "Disconnect") {
         disconnect();
@@ -133,7 +133,7 @@
         job_command("cancel");
       });
       $("#printing .exit").click(function() {
-        set_view("main");
+        set_view("main_view");
       });
 
     })
@@ -147,15 +147,34 @@
       return changed;
     }
     var _update_interval_function = function() {
-      get_printer_status().then(function(status) {
-        $("#connecting_view .status").text(status.text);
-        changed_flags = _find_changed_status_flags(status.flags);
+      update_printer_status().then(function(printer_status) {
+        $("#connecting_view .status").text(printer_status.state.text);
+
+        for(var i = 0; i<$(".temp.tools .tool").length; i++) {
+          if(printer_status.temperature.hasOwnProperty("tool"+i)) {
+            $(".temp.tools .tool:eq("+i+")").fadeIn("slow");
+            $(".temp.tools .tool:eq("+i+") .actual").text(printer_status.temperature["tool"+i].actual);
+            $(".temp.tools .tool:eq("+i+") .target").text(printer_status.temperature["tool"+i].target);
+          } else {
+            $(".temp.tools .tool:eq("+i+")").fadeOut("slow");
+          }
+        }
+
+        if(printer_status.temperature.hasOwnProperty("bed")) {
+          $(".temp.bed").fadeIn("slow");
+          $(".temp.bed .actual").text(printer_status.temperature.bed.actual);
+          $(".temp.bed .target").text(printer_status.temperature.bed.target);
+        } else {
+          $(".temp.bed").fadeOut("slow");
+        }
+
+        changed_flags = _find_changed_status_flags(printer_status.state.flags);
         console.log(changed_flags);
-        _previous_status_flags = status.flags;
+        _previous_status_flags = printer_status.state.flags;
 
         if(changed_flags.hasOwnProperty("operational")) {
           if(changed_flags.operational)
-            set_view("main");
+            set_view("main_view");
           else
             set_view("connecting_view");
         }
@@ -180,17 +199,19 @@
 
       });
 
-      get_job_status().then(function(status) {
-        console.log(status);
+      update_job_status().then(function(job_status) {
         var $progress_donut = $('#printing .progress .donut');
-        var dashoffset = $progress_donut.attr("stroke-dasharray")*(100-status.progress.completion)*0.01;
+        var dashoffset = $progress_donut.attr("stroke-dasharray")*(100-job_status.progress.completion)*0.01;
         $progress_donut.attr("stroke-dashoffset", dashoffset);
 
+        var seconds = job_status.job.estimatedPrintTime;
+        if(job_status.progress.printTimeLeft!=null)
+          seconds = job_status.progress.printTimeLeft;
         var date = new Date(null);
-        date.setSeconds(status.progress.printTimeLeft);
+        date.setSeconds(seconds);
 
         $("#printing .time").text(date.toISOString().substr(11, 8-3));
-        $("#printing .name").text(status.job.file.name);
+        $("#printing .name").text(job_status.job.file.name);
       });
     }
     $(function() {
@@ -203,8 +224,13 @@
 </head>
 <body>
   <div id="status_bar">
-    <div class="temp head">H 212&deg;C <span class="aim">220&deg;C</span></div>
-    <div class="temp bed">B 54&deg;C <span class="aim">60&deg;C</span></div>
+    <div class="temp tools">
+      <span class="tool">T<sub class="id">1</sub> <span class="actual">0</span> <span class="target">0</span></span>
+      <span class="tool">T<sub class="id">2</sub> <span class="actual">0</span> <span class="target">0</span></span>
+      <span class="tool">T<sub class="id">3</sub> <span class="actual">0</span> <span class="target">0</span></span>
+      <span class="tool">T<sub class="id">4</sub> <span class="actual">0</span> <span class="target">0</span></span>
+    </div>
+    <div class="temp bed">B <span class="actual">0</span> <span class="target">0</span></div>
   </div>
 
   <div class="view active" id="connecting_view">
@@ -216,7 +242,7 @@
     <div class="cancel">cancel</div>
   </div>
 
-  <div class="view" id="main">
+  <div class="view" id="main_view">
     <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
     <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
     <ul>
@@ -226,13 +252,13 @@
     </ul>
   </div>
 
-  <div class="view" id="files">
+  <div class="view" id="files_view">
     <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
     <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
-    <ul id="files"><li class="back">back</li></ul>
+    <ul><li class="back">back</li></ul>
   </div>
 
-  <div class="view" id="control">
+  <div class="view" id="control_view">
     <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
     <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
     <ul>

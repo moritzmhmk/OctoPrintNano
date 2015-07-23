@@ -15,13 +15,15 @@ function parseJSON(response) {
   return response.json();
 }
 
+var printer_status = {}
 
-var get_printer_status = function() {
-  return fetch(api_url+'printer?exclude=temperature,sd', {headers: {'X-Api-Key': api_key}})
+var update_printer_status = function() {
+  return fetch(api_url+'printer', {headers: {'X-Api-Key': api_key}})
   .then(checkStatus)
   .then(parseJSON)
   .then(function(json) {
-    return json.state;
+    printer_status = json;
+    return printer_status;
   })
   .catch(function(error) {
     if(error.response.status=="409") {
@@ -29,18 +31,23 @@ var get_printer_status = function() {
       .then(checkStatus)
       .then(parseJSON)
       .then(function(json) {
-        return {
-          text: json.current.state,
-          flags: {
-            operational: false,
-            paused: false,
-            printing: false,
-            sdReady: false,
-            error: false,
-            ready: false,
-            closedOrError: true
-          }
+        printer_status = {
+          sd: {ready: false},
+          state: {
+            text: json.current.state,
+            flags: {
+              operational: false,
+              paused: false,
+              printing: false,
+              sdReady: false,
+              error: false,
+              ready: false,
+              closedOrError: true
+            }
+          },
+          temperature: {}
         };
+        return printer_status;
       });
       //{flags: {operational: false}};
     } else {
@@ -120,10 +127,17 @@ var print_file = function(file) {
   .then(checkStatus);
 }
 
-var get_job_status = function() {
+
+var job_status = {};
+
+var update_job_status = function() {
   return fetch(api_url+'job', {headers: {'X-Api-Key': api_key}})
   .then(checkStatus)
-  .then(parseJSON);
+  .then(parseJSON)
+  .then(function(json) {
+    job_status = json;
+    return job_status;
+  });
 }
 
 var job_command = function(command) {
