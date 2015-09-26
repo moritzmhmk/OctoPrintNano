@@ -203,7 +203,12 @@ li.below {
   padding: 15px;
   box-sizing: border-box;
   stroke-width: 1;
+  stroke-linecap: round;
   transition: bottom 0.5s ease-in;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
   transform: rotate(-90deg);
   transform-origin: 50% 50%; }
 #printing .progress .bg {

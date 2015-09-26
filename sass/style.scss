@@ -3,6 +3,12 @@ $color_inactive: #657E84;
 $color_info: #CDCCAA;
 $color_warn: #FF6652;
 
+@mixin prefix($property, $parameters...) {
+  @each $prefix in -webkit-, -moz-, -ms-, -o-, "" {
+    #{$prefix}#{$property}: $parameters;
+  }
+}
+
 * {
   box-sizing:border-box;
   padding:0;
@@ -252,8 +258,9 @@ li.below {
     padding: 15px;
     box-sizing: border-box;
     stroke-width:1;
+    stroke-linecap: round;
     transition:bottom 0.5s ease-in;
-    transform: rotate(-90deg);
+    @include prefix(transform, rotate(-90deg));
     transform-origin: 50% 50%;
   }
   .progress .bg {
