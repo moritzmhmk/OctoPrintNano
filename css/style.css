@@ -203,12 +203,12 @@ li.below {
   padding: 15px;
   box-sizing: border-box;
   stroke-width: 1;
-  transition: bottom 0.5s ease-in; }
+  transition: bottom 0.5s ease-in;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%; }
 #printing .progress .bg {
   stroke: #657E84; }
 #printing .progress .donut {
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
   stroke: #FF6652; }
 #printing .time {
   position: absolute;
