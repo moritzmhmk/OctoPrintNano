@@ -16,6 +16,10 @@ $color_warn: #FF6652;
   -webkit-user-select:none;
 }
 
+svg {
+  pointer-events: visible;
+}
+
 body {
   background-color: $color_background;
   height:100%;
@@ -86,7 +90,9 @@ svg.btn.list {
   stroke-linejoin: round;
   stroke-linecap: round;
   stroke-width: 5;
-  left: calc(50% - 25px);
+  left: 0px;
+  width: 100%;
+  height: 100px;
 }
 
 svg.btn.list.up {
@@ -142,7 +148,7 @@ li.active {
   top: calc(50%);
   color: $color_info;
   opacity:1;
-  z-index:2;
+  z-index:20;
 }
 
 li.below {

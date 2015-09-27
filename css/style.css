@@ -5,6 +5,9 @@
   margin: 0;
   -webkit-user-select: none; }
 
+svg {
+  pointer-events: visible; }
+
 body {
   background-color: #314043;
   height: 100%;
@@ -73,7 +76,9 @@ svg.btn.list {
   stroke-linejoin: round;
   stroke-linecap: round;
   stroke-width: 5;
-  left: calc(50% - 25px); }
+  left: 0px;
+  width: 100%;
+  height: 100px; }
 
 svg.btn.list.up {
   top: -100%;
@@ -122,7 +127,7 @@ li.active {
   top: calc(50%);
   color: #CDCCAA;
   opacity: 1;
-  z-index: 2; }
+  z-index: 20; }
 
 li.below {
   top: calc(50% + 30px);

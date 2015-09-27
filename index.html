@@ -138,15 +138,19 @@
       });
 
       $("#printing .pause").click(function() {
+        console.debug("pause clicked");
         pause_job();
       });
       $("#printing .play").click(function() {
+        console.debug("play clicked");
         pause_job();// play/pause is one command...
       });
       $("#printing .stop").click(function() {
+        console.debug("stop clicked");
         cancel_job();
       });
       $("#printing .exit").click(function() {
+        console.debug("exit clicked");
         set_view("main_view");
       });
 
@@ -183,7 +187,7 @@
         }
 
         changed_flags = _find_changed_status_flags(printer_status.state.flags);
-        console.log(changed_flags);
+        //console.log(changed_flags);
         _previous_status_flags = printer_status.state.flags;
 
         if(changed_flags.hasOwnProperty("operational")) {
@@ -248,8 +252,8 @@
   </div>
 
   <div class="view active" id="connecting_view">
-    <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
-    <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
+    <svg viewbox="0   0 50 100" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
+    <svg viewbox="0 -50 50 100" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
     <ul></ul>
 
     <div class="status">Connecting</div>
@@ -257,8 +261,8 @@
   </div>
 
   <div class="view" id="main_view">
-    <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
-    <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
+    <svg viewbox="0   0 50 100" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
+    <svg viewbox="0 -50 50 100" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
     <ul>
       <li class="above">Print</li>
       <li class="active">Control</li>
@@ -267,14 +271,14 @@
   </div>
 
   <div class="view" id="files_view">
-    <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
-    <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
+    <svg viewbox="0   0 50 100" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
+    <svg viewbox="0 -50 50 100" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
     <ul><li class="back">back</li></ul>
   </div>
 
   <div class="view" id="control_view">
-    <svg viewbox="0 0 50 50" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
-    <svg viewbox="0 0 50 50" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
+    <svg viewbox="0   0 50 100" class="active_light btn list up"><path d="M 5 25 m 0 6 l 20 -12 l 20 12" /></svg>
+    <svg viewbox="0 -50 50 100" class="active_light btn list down"><path d="M 5 25 m 0 -6 l 20 12 l 20 -12" /></svg>
     <ul>
       <li class="back above">back</li>
       <li class="active">Move</li>
