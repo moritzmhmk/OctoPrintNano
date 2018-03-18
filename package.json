@@ -1,0 +1,39 @@
+{
+  "name": "octoprintnano",
+  "version": "0.0.2",
+  "description": "OctoPrint webclient designed for small (touch) screens",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack.dev.config.js --host 0.0.0.0",
+    "build": "webpack --config webpack.prod.config.js --progress",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/moritzmhmk/OctoPrintNano.git"
+  },
+  "author": "Moritz K.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/moritzmhmk/OctoPrintNano/issues"
+  },
+  "homepage": "https://github.com/moritzmhmk/OctoPrintNano#readme",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "redux-devtools-extension": "^2.13.2",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.12",
+    "webpack-dev-server": "^3.1.1"
+  },
+  "dependencies": {
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-redux": "^5.0.7",
+    "redux": "^3.7.2",
+    "redux-thunk": "^2.2.0"
+  }
+}
