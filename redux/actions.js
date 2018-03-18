@@ -16,6 +16,38 @@ export const getConnection = () => fetchAPI(
   }
 )
 
+export const CONNECT_REQUEST = 'CONNECT_REQUEST'
+export const CONNECT_SUCCESS = 'CONNECT_SUCCESS'
+export const CONNECT_FAILURE = 'CONNECT_FAILURE'
+export const connect = (port) => fetchAPI(
+  {
+    request: () => ({type: CONNECT_REQUEST}),
+    success: () => ({type: CONNECT_SUCCESS}),
+    failure: reason => ({type: CONNECT_FAILURE, payload: reason})
+  },
+  {
+    endpoint: 'connection',
+    method: 'post',
+    body: {command: 'connect', port}
+  }
+)
+
+export const DISCONNECT_REQUEST = 'DISCONNECT_REQUEST'
+export const DISCONNECT_SUCCESS = 'DISCONNECT_SUCCESS'
+export const DISCONNECT_FAILURE = 'DISCONNECT_FAILURE'
+export const disconnect = (port) => fetchAPI(
+  {
+    request: () => ({type: DISCONNECT_REQUEST}),
+    success: () => ({type: DISCONNECT_SUCCESS}),
+    failure: reason => ({type: DISCONNECT_FAILURE, payload: reason})
+  },
+  {
+    endpoint: 'connection',
+    method: 'post',
+    body: {command: 'disconnect'}
+  }
+)
+
 export const GET_FILES_REQUEST = 'GET_FILES_REQUEST'
 export const GET_FILES_SUCCESS = 'GET_FILES_SUCCESS'
 export const GET_FILES_FAILURE = 'GET_FILES_FAILURE'
