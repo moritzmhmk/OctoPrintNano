@@ -1,0 +1,82 @@
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  -webkit-user-select: none;
+}
+
+body {
+  background-color: #314043;
+  height: 100%;
+  width: 100%;
+  font-family: 'Source Sans Pro', sans-serif;
+  font-size: 16px;
+  color: #CDCCAA;
+  overflow: hidden;
+}
+
+.listview ul {
+  position: absolute;
+  top: 50px;
+  left: 0px;
+  width: 100%;
+  z-index: -1;
+}
+
+.listview li {
+  position: relative;
+  left: 0px;
+  width: 100%;
+  text-align: center;
+  list-style: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: calc(calc(100vh - 100px) / 3);
+  height: calc(calc(100vh - 100px) / 3);
+  padding-left: 10px;
+  padding-right: 10px;
+  color: #657E84;
+  transition: color 1000ms ease-in;
+}
+
+.listview li.active { transition: none; color: #CDCCAA; }
+.listview li.active:active { color: #657E84; }
+
+.listview li.fade-exit.fade-exit-active { transition: all 1000ms ease-in; }
+.listview li.fade-enter.fade-enter-active { transition: all 1000ms ease-in; }
+
+.listview li:nth-child(1).fade-enter, li:nth-child(1).fade-exit.fade-exit-active { margin-top: calc(calc(100vh - 100px) / -3); }
+.listview li:nth-child(1).fade-enter.fade-enter-active, li:nth-child(1).fade-exit  { margin-top: 0px; }
+
+.listview li.fade-enter { opacity: 0; }
+.listview li.fade-enter.fade-enter-active { opacity: 1; }
+.listview li.fade-exit { opacity: 1; }
+.listview li.fade-exit.fade-exit-active { opacity: 0; }
+
+
+.listview .btn {
+  position: absolute;
+  left: 0px;
+  width: 100%;
+  height: 50px;
+  z-index: 10;
+
+  stroke: #CDCCAA;
+  fill: none;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  stroke-width: 5;
+}
+
+.listview .btn:active { stroke: #657E84; }
+
+.listview .btn.up {
+  top: 0px;
+  transition: top 0.5s ease-in;
+}
+
+.listview .btn.down {
+  bottom: 0px;
+  transition: bottom 0.5s ease-in;
+}
