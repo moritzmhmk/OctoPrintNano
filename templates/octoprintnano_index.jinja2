@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>OctoPrintNano</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+        <script>
+          window.localStorage.setItem('api_key', '{{ api_key }}')
+        </script>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script>
+          const apiKey = window.localStorage.getItem('api_key')
+          fetch('api/printer', {headers: {'X-Api-Key': apiKey}})
+          .then(res => res.json())
+          .then(json => console.log(json))
+
+          fetch('api/connection', {
+            method: "post",
+            headers: {
+              'X-Api-Key': apiKey,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              "command": "connect",
+              "port": 'VIRTUAL'
+            })
+          })
+          .then(res => console.log(res))
+        </script>
+    </body>
+</html>
